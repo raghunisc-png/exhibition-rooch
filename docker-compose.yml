@@ -9,7 +9,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-expo_user}"]
       interval: 5s
@@ -30,7 +30,7 @@ services:
     volumes:
       - uploads_data:/app/uploads
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     command: >
       sh -c "alembic upgrade head &&
              (python -m app.create_admin 'Admin' admin@rooch.in 'Rooch@123' || true) &&
@@ -45,7 +45,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80"
 
 volumes:
   db_data:
