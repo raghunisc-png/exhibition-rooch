@@ -27,7 +27,7 @@ In wherever `rooch.in`'s DNS is managed (Hostinger's DNS zone, typically), add:
 ```
 Type: A
 Name: exhibition
-Value: <your VPS public IP>
+Value: 62.72.31.141
 TTL:   default
 ```
 
@@ -35,7 +35,13 @@ Give it a few minutes to propagate before requesting a certificate in step 5.
 
 ## 2. Prepare the VPS
 
-SSH in, then:
+SSH in (swap `root` for whatever user Hostinger gave you, if different):
+
+```bash
+ssh root@62.72.31.141
+```
+
+Then:
 
 ```bash
 apt update && apt upgrade -y
