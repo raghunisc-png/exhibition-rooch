@@ -54,15 +54,16 @@ ufw --force enable
 
 ## 3. Clone the three repos
 
-You'll need read access configured on the server for all three (a deploy key per repo,
-or a PAT if cloning over HTTPS).
+You'll need read access configured on the server for all three. If the repos are
+private, either add a deploy key per repo, or clone over HTTPS with a PAT (e.g.
+`https://<token>@github.com/raghunisc-png/exhibition-rooch.git`).
 
 ```bash
 mkdir -p /opt/exhibition_rooch
-git clone <root-repo-url> /opt/exhibition_rooch
+git clone https://github.com/raghunisc-png/exhibition-rooch.git /opt/exhibition_rooch
 cd /opt/exhibition_rooch
-git clone <backend-repo-url> backend
-git clone <frontend-repo-url> frontend
+git clone https://github.com/raghunisc-png/exhibition-rooch-backend.git backend
+git clone https://github.com/raghunisc-png/exhibition-rooch-frontend.git frontend
 ```
 
 ## 4. Configure environment variables
@@ -174,8 +175,15 @@ Then open `https://exhibition.rooch.in` in a browser and log in.
 cd /opt/exhibition_rooch && git pull
 cd backend && git pull
 cd ../frontend && git pull
-cd .. && docker compose up -d --build
+cd ..
+docker compose up -d --build
 ```
+
+Repos, for reference:
+
+- Root (this compose stack + deployment docs): https://github.com/raghunisc-png/exhibition-rooch
+- Backend: https://github.com/raghunisc-png/exhibition-rooch-backend
+- Frontend: https://github.com/raghunisc-png/exhibition-rooch-frontend
 
 ## Backups
 
