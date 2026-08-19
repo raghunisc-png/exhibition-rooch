@@ -30,7 +30,7 @@ services:
     volumes:
       - uploads_data:/app/uploads
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8126:8000"
     command: >
       sh -c "alembic upgrade head &&
              (python -m app.create_admin 'Admin' admin@rooch.in 'Rooch@123' || true) &&
@@ -45,7 +45,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "127.0.0.1:5173:80"
+      - "127.0.0.1:8125:80"
 
 volumes:
   db_data:

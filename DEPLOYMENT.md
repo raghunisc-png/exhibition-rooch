@@ -135,7 +135,7 @@ server {
     client_max_body_size 20m;
 
     location /api/ {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8126;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -143,16 +143,16 @@ server {
     }
 
     location /files/ {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8126;
         proxy_set_header Host $host;
     }
 
     location /health {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8126;
     }
 
     location / {
-        proxy_pass http://127.0.0.1:5173;
+        proxy_pass http://127.0.0.1:8125;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
