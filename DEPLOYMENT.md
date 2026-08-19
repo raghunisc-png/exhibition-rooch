@@ -112,9 +112,20 @@ the password through the API/UI immediately after first deploy, then remove the
 `docker-compose.yml`'s ports are bound to `127.0.0.1` only (not the public interface) —
 Nginx is the only thing that talks to the containers directly.
 
-Create `/etc/nginx/sites-available/exhibition.rooch.in`:
+### 5.1 Confirm Nginx is running
 
-```nginx
+```bash
+systemctl status nginx --no-pager
+```
+
+If it's not active, `systemctl enable --now nginx`.
+
+### 5.2 Write the site config
+
+Write the file directly with a heredoc (no need to open an editor):
+
+```bash
+cat > /etc/nginx/sites-available/exhibition.rooch.in <<'EOF'
 server {
     listen 80;
     server_name exhibition.rooch.in;
@@ -146,17 +157,77 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
     }
 }
+EOF
 ```
 
-```bash
-ln -s /etc/nginx/sites-available/exhibition.rooch.in /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
+(The quotes around `'EOF'` matter — they stop the shell from trying to expand `$host` /
+`$remote_addr` itself; those need to reach the file literally, for Nginx to expand.)
 
+### 5.3 Enable the site
+
+```bash
+ln -sf /etc/nginx/sites-available/exhibition.rooch.in /etc/nginx/sites-enabled/
+```
+
+Hostinger's default Ubuntu image sometimes ships a `default` site listening on `:80`
+too, which can shadow this one if its `server_name` is `_` (catch-all). Check:
+
+```bash
+ls /etc/nginx/sites-enabled/
+```
+
+If `default` is listed and you don't need it, remove just the symlink (not the file in
+`sites-available`, in case you want it back):
+
+```bash
+rm -f /etc/nginx/sites-enabled/default
+```
+
+### 5.4 Test and reload
+
+```bash
+nginx -t
+```
+
+`nginx -t` validates syntax without touching the running server — fix any errors it
+reports before continuing. Once it prints `syntax is ok` / `test is successful`:
+
+```bash
+systemctl reload nginx
+```
+
+At this point `http://exhibition.rooch.in` should already reach the frontend (no TLS
+yet) — worth a quick sanity check before requesting a certificate:
+
+```bash
+curl -sI http://exhibition.rooch.in
+```
+
+### 5.5 Get the certificate
+
+```bash
 certbot --nginx -d exhibition.rooch.in
 ```
 
-Certbot rewrites the config to redirect `:80` → `:443` and installs the certificate;
-renewal is handled automatically by the `certbot.timer` systemd unit it sets up.
+This is interactive the first time: it asks for an email (for renewal/expiry notices)
+and asks you to agree to Let's Encrypt's terms. To run it non-interactively instead
+(e.g. scripted setup):
+
+```bash
+certbot --nginx -d exhibition.rooch.in --non-interactive --agree-tos -m you@rooch.in --redirect
+```
+
+`--redirect` makes Certbot add the `:80` → `:443` redirect to the config automatically.
+Either way, it rewrites `/etc/nginx/sites-available/exhibition.rooch.in` in place with
+the `listen 443 ssl` block and certificate paths.
+
+### 5.6 Verify
+
+```bash
+curl -sI https://exhibition.rooch.in
+systemctl status certbot.timer --no-pager   # confirms auto-renewal is scheduled
+certbot renew --dry-run                      # simulates a renewal without changing anything
+```
 
 ## 6. Bring the stack up
 
